@@ -1,0 +1,59 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #000000;
+	color:#EEEEEE;
+}
+
+a, a:active, a:visited {
+	color:#FFFFFF;
+	text-decoration: none;
+}
+
+a.examples {
+	font-size:5em;
+}
+
+a:hover {
+	color:#444444;
+	background-color: #560077;
+}
+
+div#content {
+	border: 1px solid;
+	border-color: #333333;
+	margin: 10px auto;
+	width: 800px;
+	height: 600px;
+}
+
+div.pane {
+	width: 50%;
+	height: 600px;
+	float:left;
+}
+
+div#controls {
+	background-color:#333333;
+}
+
+div.option {
+	padding:5px;
+	height:20px;
+}
+
+div.option_big {
+	padding:5px;
+	height:60px;
+}
+
+div.label {
+	width:40%;
+	float:left;
+}
+
+div.colorPicker,
+div.option_content,
+div.slider {
+	width:50%;
+	float:left;
+}

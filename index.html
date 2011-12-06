@@ -1,0 +1,72 @@
+<html>
+	<head>
+		<title>Particle Demo</title>
+		
+		<script src="compat.js"></script>
+		<script src="jquery-1.6.2.min.js"></script>
+		<script src="jquery-ui-1.8.16.custom.min.js"></script>
+		
+		<script src="thegoldenmule/particle/Itsy.js"></script>
+		<script src="thegoldenmule/particle/ItsyPlugins.js"></script>
+		<script src="GameTime.js"></script>
+		
+		<script src="Demo.js"></script>
+		
+		<link rel="stylesheet" type="text/css" href="jquery-ui-1.8.16.custom.css">
+		<link rel="stylesheet" type="text/css" href="global.css">
+	</head>
+	<body>
+		<div id=content>
+			<div class=pane id=graphics></div>
+			<div class=pane id=controls>
+				<div class=option>
+					<div class=label>Emission Rate</div>
+					<div class=slider id=slider_emissionRate></div>
+				</div>
+				<div class=option>
+					<div class=label>Lifetime</div>
+					<div class=slider id=slider_lifetime></div>
+				</div>
+				<div class=option>
+					<div class=label>Size</div>
+					<div class=slider id=slider_size></div>
+				</div>
+				<div class=option>
+					<div class=label>Velocity Angle Min</div>
+					<div class=slider id=slider_velocity_min></div>
+				</div>
+				<div class=option>
+					<div class=label>Velocity Angle Max</div>
+					<div class=slider id=slider_velocity_max></div>
+				</div>
+				<div class=option>
+					<div class=label>Velocity Mag. Min</div>
+					<div class=slider id=slider_velocity_mmin></div>
+				</div>
+				<div class=option>
+					<div class=label>Velocity Mag. Max</div>
+					<div class=slider id=slider_velocity_mmax></div>
+				</div>
+				<div class=option>
+					<div class=label>X-Acceleration</div>
+					<div class=slider id=slider_acceleration_x></div>
+				</div>
+				<div class=option>
+					<div class=label>Y-Acceleration</div>
+					<div class=slider id=slider_acceleration_y></div>
+				</div>
+			</div>
+			<div id=examples>
+				<a class=examples id=example1 href=#>1</a>
+				<a class=examples id=example2 href=#>2</a>
+				<a class=examples id=example2 href=#>3</a>
+				<a class=examples id=example2 href=#>4</a>
+				<a class=examples id=example2 href=#>5</a>
+			</div>
+		</div>
+		
+		<script>
+			jQuery(document).ready(new Demo().init);
+		</script>
+	</body>
+</html>

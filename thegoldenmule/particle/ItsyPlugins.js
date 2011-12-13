@@ -11,19 +11,32 @@ if (!thegoldenmule.particle) thegoldenmule.particle = {};
  * Position plugin.
  * 
  * Give it x, y, and a radius, and it will provide a random
- * position within the bounding circle.
+ * position within the bounding circle. An option innerRadius parameter may be
+ * used that will omit creating particles within the innerRadius.
  */
-thegoldenmule.particle.Position = function(xval, yval, radius) {
+thegoldenmule.particle.Position = function(xval, yval, radius, innerRadius) {
 	this.x = xval;
 	this.y = yval;
+	this.innerRadius = innerRadius ? innerRadius : 0;
+	
+	if (radius <= this.innerRadius) {
+		radius = this.innerRadius + 1;
+	}
+	
 	this.radius = radius;
 };
 
 thegoldenmule.particle.Position.prototype = {
 	initialize:
 		function(emitter, particle) {
-			particle.x = this.x + (Math.random() - 0.5) * Math.random() * this.radius;
-			particle.y = this.y + (Math.random() - 0.5) * Math.random() * this.radius;
+			particle.x = this.x + (Math.random() - 0.5) * Math.random() * (this.radius - this.innerRadius);
+			particle.y = this.y + (Math.random() - 0.5) * Math.random() * (this.radius - this.innerRadius);
+			
+			if (0 != this.innerRadius) {
+				var randomAngle = Math.random() * 2 * Math.PI;
+				particle.x += this.innerRadius * Math.sin(randomAngle);
+				particle.y += this.innerRadius * Math.cos(randomAngle);
+			}
 		}
 };
 
@@ -49,11 +62,6 @@ thegoldenmule.particle.Velocity.prototype = {
 			
 			particle.vx = Math.sin(angle) * magnitude;
 			particle.vy = Math.cos(angle) * magnitude;
-		},
-	update:
-		function(emitter, particle) {
-			particle.x += particle.vx;
-			particle.y += particle.vy;
 		}
 };
 
@@ -69,10 +77,10 @@ thegoldenmule.particle.Acceleration = function(xval, yval) {
 };
 
 thegoldenmule.particle.Acceleration.prototype = {
-	update:
+	initialize:
 		function(emitter, particle) {
-			particle.vx += this.x;
-			particle.vy += this.y;
+			particle.ax = this.x;
+			particle.ay = this.y;
 		}
 };
 
@@ -133,7 +141,7 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 				}
 			}
 		}
-		
+		console.log("Get defaults");
 		return [getDefaultColor(0), getDefaultColor(1)];
 	}
 	
@@ -141,6 +149,13 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 		withSize:
 			function(size) {
 				this.size = size;
+				
+				return this;
+			},
+		withRandomSize:
+			function(min, max) {
+				this.min = min;
+				this.max = max;
 				
 				return this;
 			},
@@ -160,6 +175,12 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 				this.colors = [];
 				
 				return this;
+			},
+		initialize:
+			function(emitter, particle) {
+				if (this.min && this.max) {
+					particle.size = this.min + Math.random() * (this.max - this.min);
+				}
 			},
 		render:
 			function(emitter, particle) {
@@ -182,9 +203,11 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 					+ ~~value("b", ta) + ", "
 					+ value("a", ta) + ")";
 				
+				var size = particle.size ? particle.size : this.size;
+				
 				this.context.fillStyle = fillStyle;
 				this.context.beginPath();
-				this.context.arc(particle.x, particle.y, this.size, 0, TWOPI);
+				this.context.arc(emitter.x + particle.x, emitter.y + particle.y, size, 0, TWOPI);
 				this.context.closePath();
 				this.context.fill();
 			}
@@ -244,9 +267,95 @@ thegoldenmule.particle.BasicRenderer.prototype = (function(){
 					+ ~~this.b + ", "
 					+ this.a + ")";
 				this.context.beginPath();
-				this.context.arc(particle.x, particle.y, this.size, 0, TWOPI);
+				this.context.arc(emitter.x + particle.x, emitter.y + particle.y, this.size, 0, TWOPI);
 				this.context.closePath();
 				this.context.fill();
+			}
+	};
+})();
+
+/**
+ * Attractor plugin.
+ * 
+ * This attracts (or repels) particles. This only approximates gravitation.
+ * 
+ */
+thegoldenmule.particle.Attractor = function(x, y, amount) {
+	this.x = x;
+	this.y = y;
+	this.amount = amount;
+};
+
+thegoldenmule.particle.Attractor.prototype = (function() {
+	// a treat just for people who read the source
+	var G = 1;
+	
+	return {
+		update:
+			function(emitter, particle) { 
+				particle.ax = this.x - particle.x / this.amount;
+				particle.ay = this.y - particle.y / this.amount;
+			}
+	};
+})();
+
+/**
+ * VelocityRenderer plugin.
+ */
+thegoldenmule.particle.VelocityRenderer = function(context, size) {
+	this.colors = [];
+	this.size = size ? size : 1;
+	this.context = context;
+};
+
+thegoldenmule.particle.VelocityRenderer.prototype = (function(){
+	var TWOPI = 2 * Math.PI;
+	
+	return {
+		withColor:
+			function(r, g, b, a, t) {
+				this.colors.push({
+					rgba:"rgba(" + ~~r + ", " + ~~g + ", " + ~~b + ", " + a + ")",
+					t:t
+				});
+				
+				return this;
+			},
+		
+		render:
+			function(emitter, particle) {
+				if (this.colors.length < 2) {
+					throw new Error("Velocity renderer must have at least 2 colors via withColor method.");
+					return;
+				}
+				
+				// save matrix
+				this.context.save();
+				
+				// find coordinates
+				var originx = emitter.x + particle.x;
+				var originy = emitter.y + particle.y;
+				
+				// rotate canvas
+				var angle = Math.atan2(particle.vy, particle.vx);
+				this.context.translate(originx, originy)
+				this.context.rotate(angle);
+				
+				// create gradient
+				var magnitude = this.size * Math.sqrt(particle.x * particle.x + particle.y * particle.y);
+				var gradient = this.context.createLinearGradient(0, 0, -this.size * magnitude, 1);
+				
+				// add colors
+				for (var i = 0, len = this.colors.length; i < len; i++) {
+					gradient.addColorStop(i == len - 1 ? 1 : this.colors[i].t, this.colors[i].rgba);
+				}
+				
+				// draw!
+				this.context.fillStyle = gradient;
+				this.context.fillRect(0, 0, -this.size * magnitude, 1);
+				
+				// restore
+				this.context.restore();
 			}
 	};
 })();

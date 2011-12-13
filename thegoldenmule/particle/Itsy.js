@@ -7,15 +7,15 @@
 if (!thegoldenmule) var thegoldenmule = {};
 if (!thegoldenmule.particle) thegoldenmule.particle = {};
 
-thegoldenmule.particle.ParticleEmitter = function (plugins) {
+thegoldenmule.particle.ParticleEmitter = function (plugins, x, y) {
 	plugins = plugins ? plugins : [];
 	
 	var Particle = thegoldenmule.particle.Particle;
 	
 	var that = this;
 	that.emissionRate = 50;
-	that.x = 200;
-	that.y = 200;
+	that.x = x ? x : 200;
+	that.y = y ? y : 200;
 	that.particles = [];
 	that.maxParticles = 10000;
 	that.lifetime = 1000;
@@ -30,6 +30,12 @@ thegoldenmule.particle.ParticleEmitter = function (plugins) {
 			}
 		}
 	}
+	
+	that.withProperty = function(property, value) {
+		that[property] = value;
+		
+		return that;
+	};
 	
 	that.addPlugin = function(plugin) {
 		plugins.push(plugin);
@@ -53,6 +59,7 @@ thegoldenmule.particle.ParticleEmitter = function (plugins) {
 			len = that.particles.length;
 		for (var i = 0; i < rate; i++) {
 			var particle = new Particle();
+			particle.lifetime = that.lifetime;
 			
 			// apply plugins
 			applyPlugins(particle, plugins, "initialize", dt);
@@ -73,9 +80,20 @@ thegoldenmule.particle.ParticleEmitter = function (plugins) {
 			// apply plugins
 			applyPlugins(particle, plugins, "update", dt);
 			
+			// we're not doing real integration here, though plugins are free to
+			
+			// apply acceleration
+			particle.vx += particle.ax;
+			particle.vy += particle.ay;
+			
+			// apply velocity
+			particle.x += particle.vx;
+			particle.y += particle.vy;
+			
 			// update age + prune
 			particle.alive += dt;
-			if (particle.alive < that.lifetime) {
+			
+			if (particle.alive < particle.lifetime) {
 				// apply plugins
 				applyPlugins(particle, plugins, "render", dt);
 				particles.push(particle);
@@ -91,5 +109,7 @@ thegoldenmule.particle.Particle = function () {
 	that.y = 0;
 	that.vx = 0;
 	that.vy = 0;
+	that.ax = 0;
+	that.ay = 0;
 	that.alive = 0;
 };

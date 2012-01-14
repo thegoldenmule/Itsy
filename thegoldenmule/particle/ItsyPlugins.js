@@ -230,7 +230,7 @@ thegoldenmule.particle.EmissionRateFade = function(start, finish, time) {
 thegoldenmule.particle.EmissionRateFade.prototype = {
 	updateGlobal:
 		function(emitter, particle, dt) {
-			this.elapsed += dt;
+			if ("undefined" !== typeof dt) this.elapsed += dt;
 			
 			if (this.elapsed >= this.time) {
 				emitter.emissionRate = this.finish;

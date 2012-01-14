@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Itsy Fire</title>
+	
+	<script src="jquery-1.3.2.min.js"></script>
+	<script src="GameTime.js"></script>
+	<script src="../thegoldenmule/particle/Itsy.js"></script>
+	<script src="../thegoldenmule/particle/ItsyPlugins.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<canvas width=400 height=400 id=stage></canvas>
+	
+	<script>
+		$(document).ready(function() {
+			var canvas = document.getElementById("stage");
+			var context = canvas.getContext("2d");
+			
+			// setup emitter
+			var emitter = new thegoldenmule.particle.ParticleEmitter([
+				new thegoldenmule.particle.Acceleration(0, -0.09),
+				new thegoldenmule.particle.Velocity(3 * Math.PI / 4, 5 * Math.PI / 4, 1, 1),
+				new thegoldenmule.particle.Position(0, 100, 10),
+				new thegoldenmule.particle.Lifetime(1000, 2000),
+				new thegoldenmule.particle.ColorTweenRenderer(context)
+						.addColor(0, 255, 255, 200,0.5)
+						.addColor(0.3, 255, 255, 50, 0.3)
+						.addColor(1, 255, 70, 0, 0.2)
+			]);
+			
+			// update
+			var time = new GameTime();
+			$(time).bind("tick", function(event, gameTime) {
+				// clear
+				canvas.width = canvas.width;
+				
+				// update
+				if (emitter) {
+					emitter.update(gameTime.step);
+				}
+			});
+			
+			$("#stage").click(function() {
+				if (time.getIsTicking()) {
+					time.stop();
+				} else {
+					time.start();
+				}
+			});
+		});
+	</script>
+</body>
+</html>

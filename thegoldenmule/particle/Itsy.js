@@ -100,6 +100,9 @@ thegoldenmule.particle.ParticleEmitter = function (plugins, x, y) {
 			}
 		}
 		that.particles = particles;
+		
+		// tell plugins they are done!
+		applyPlugins(null, plugins, "updateEndGlobal", dt);
 	};
 };
 

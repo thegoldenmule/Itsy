@@ -115,6 +115,7 @@ thegoldenmule.particle.ColorTweenRenderer = function(context) {
 	this.context = context;
 	this.colors = [];
 	this.size = 10;
+	//this.context.globalCompositeOperation = "lighter";
 };
 
 thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
@@ -141,7 +142,7 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 				}
 			}
 		}
-		console.log("Get defaults");
+		
 		return [getDefaultColor(0), getDefaultColor(1)];
 	}
 	
@@ -182,6 +183,14 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 					particle.size = this.min + Math.random() * (this.max - this.min);
 				}
 			},
+		updateGlobal:
+			function(emitter) {
+				this.context.globalCompositeOperation = "lighter";
+			},
+		updateEndGlobal:
+			function(emitter) {
+				
+			},
 		render:
 			function(emitter, particle) {
 				// find colors to tween be*tween* 
@@ -192,24 +201,23 @@ thegoldenmule.particle.ColorTweenRenderer.prototype = (function() {
 				// find t_a
 				var ta = (particle.alive - (fromColor.time * particle.lifetime)) / ((toColor.time - fromColor.time) * particle.lifetime);
 				
-				function value(property, t) {
-					var delta = toColor.color[property] - fromColor.color[property];
-					return fromColor.color[property] + t * delta;
-				}
+				fromColor = fromColor.color;
+				toColor = toColor.color;
 				
-				var fillStyle = "rgba("
-					+ ~~value("r", ta) + ", "
-					+ ~~value("g", ta) + ", "
-					+ ~~value("b", ta) + ", "
-					+ value("a", ta) + ")";
-				
-				var size = particle.size ? particle.size : this.size;
-				
-				this.context.fillStyle = fillStyle;
-				this.context.beginPath();
-				this.context.arc(emitter.x + particle.x, emitter.y + particle.y, size, 0, TWOPI);
-				this.context.closePath();
-				this.context.fill();
+				var context = this.context;
+				context.fillStyle = "rgba("
+					+ ~~(fromColor["r"] + ta * (toColor["r"] - fromColor["r"])) + ","
+					+ ~~(fromColor["g"] + ta * (toColor["g"] - fromColor["g"])) + ","
+					+ ~~(fromColor["b"] + ta * (toColor["b"] - fromColor["b"])) + ","
+					+ (fromColor["a"] + ta * (toColor["a"] - fromColor["a"])) + ")";
+				context.beginPath();
+				context.arc(
+					emitter.x + particle.x,
+					emitter.y + particle.y,
+					particle.size ? particle.size : this.size,
+					0, TWOPI);
+				context.closePath();
+				context.fill();
 			}
 	};
 })();
@@ -230,7 +238,7 @@ thegoldenmule.particle.EmissionRateFade = function(start, finish, time) {
 thegoldenmule.particle.EmissionRateFade.prototype = {
 	updateGlobal:
 		function(emitter, particle, dt) {
-			if ("undefined" !== typeof dt) this.elapsed += dt;
+			this.elapsed += dt;
 			
 			if (this.elapsed >= this.time) {
 				emitter.emissionRate = this.finish;
@@ -259,17 +267,24 @@ thegoldenmule.particle.BasicRenderer.prototype = (function(){
 	var TWOPI = 2 * Math.PI;
 	
 	return {
-		update:
-			function(emitter, particle) {
+		updateGlobal:
+			function(emitter) {
+				this.context.globalCompositeOperation = "lighter";
 				this.context.fillStyle = "rgba("
 					+ ~~this.r + ", "
 					+ ~~this.g + ", "
 					+ ~~this.b + ", "
 					+ this.a + ")";
 				this.context.beginPath();
-				this.context.arc(emitter.x + particle.x, emitter.y + particle.y, this.size, 0, TWOPI);
+			},
+		updateEndGlobal:
+			function(emitter) {
 				this.context.closePath();
 				this.context.fill();
+			},
+		update:
+			function(emitter, particle) {
+				this.context.arc(emitter.x + particle.x, emitter.y + particle.y, this.size, 0, TWOPI);
 			}
 	};
 })();

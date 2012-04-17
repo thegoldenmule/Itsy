@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Itsy Fire 2</title>
+	
+	<script src="jquery-1.3.2.min.js"></script>
+	<script src="GameTime.js"></script>
+	<script src="../thegoldenmule/particle/Itsy.js"></script>
+	<script src="../thegoldenmule/particle/ItsyPlugins.js"></script>
+	<script src="CustomPlugins.js"></script>
+</head>
+<body style="background-color: #000000">
+	<canvas width=400 height=400 id=stage></canvas>
+	
+	<script>
+		$(document).ready(function() {
+			var canvas = document.getElementById("stage");
+			var context = canvas.getContext("2d");
+			var emitter = new thegoldenmule.particle.ParticleEmitter([
+					new thegoldenmule.particle.Lifetime(100, 5000),
+					new thegoldenmule.particle.Acceleration(0, -0.0009),
+					new thegoldenmule.particle.FollowMouse(3, 10),
+					new thegoldenmule.particle.ColorTweenRenderer(context)
+							.addColor(0, 20, 50, 50, 255, 0.7)
+							.addColor(0.5, 10, 0, 20, 0.3)
+							.addColor(1, 0, 0, 0, 0)
+							.withRandomSize(1, 3)
+				]);
+			
+			// update
+			var time = new GameTime();
+			$(time).bind("tick", function(event, gameTime) {
+				// clear
+				canvas.width = canvas.width;
+				
+				emitter.update(gameTime.step);
+			});
+			time.start();
+		});
+	</script>
+</body>
+</html>

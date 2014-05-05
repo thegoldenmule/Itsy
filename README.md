@@ -1,4 +1,4 @@
-[Introduction[(http://thegoldenmule.com/blog/2012/01/itsy-a-cute-name-for-an-otherwise-uncaring-particle-system/)
+[Introduction](http://thegoldenmule.com/blog/2012/01/itsy-a-cute-name-for-an-otherwise-uncaring-particle-system/)
 
 [Examples](http://thegoldenmule.com/blog/2012/01/itsy-examples/)
 
